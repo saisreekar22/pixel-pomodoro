@@ -1,0 +1,125 @@
+/* --- VARIABLES --- */
+:root {
+    /* Retro "Gameboyish" Palette */
+    --brand-bg: #E0E0D0;
+    /* Classic Beige Plastic */
+    --brand-card: #C0C0B0;
+    /* Darker Plastic */
+    --brand-accent: #FF5D5D;
+    /* Button Red */
+    --brand-secondary: #8BAC0F;
+    /* Gameboy Green Screen (Light) */
+    --brand-secondary-dark: #306230;
+    /* Gameboy Green Screen (Dark) */
+    --brand-text: #2D2D2D;
+    /* Dark Grey/Black */
+    --screen-bg: #9BBC0F;
+}
+
+body {
+    -webkit-tap-highlight-color: transparent;
+    background-color: var(--brand-bg);
+    background-image:
+        radial-gradient(circle at 10% 10%, #00000005 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, #00000005 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* Typography */
+.font-pixel {
+    font-family: 'Press Start 2P', cursive;
+    line-height: 1.5;
+}
+
+/* Utilities */
+.pixelated {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.text-shadow-sm {
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+}
+
+/* --- CONSOLE SHELL --- */
+.console-shell {
+    background: var(--brand-bg);
+    /* Subtle plastic texture */
+}
+
+/* SCREEN */
+.screen-bezel {
+    background: #555560;
+    /* Dark Grey Bezel */
+    box-shadow:
+        inset 0 0 20px rgba(0, 0, 0, 0.5),
+        0 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.lcd-screen {
+    background: var(--screen-bg);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Buttons */
+.console-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+}
+
+.console-btn:active {
+    transform: scale(0.95);
+}
+
+/* ANIMATIONS */
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(-5deg);
+    }
+
+    75% {
+        transform: rotate(5deg);
+    }
+}
+
+.animate-shake {
+    animation: shake 0.5s steps(4) infinite;
+}
+
+@keyframes bounce-step {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.animate-step {
+    animation: bounce-step 1s steps(2) infinite;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--brand-text);
+    border-radius: 4px;
+}
