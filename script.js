@@ -6,22 +6,18 @@
 /* --- CONFIG & ASSETS --- */
 const ASSETS = {
     pets: ['cat', 'dog', 'slime', 'ghost', 'dino'],
-    accessories: ['crown', 'headphones'], // Filenames must match `acc_X.png`
-    bg: ['grass', 'space', 'cloud']
+    accessories: ['crown', 'headphones', 'glasses', 'hat', 'scarf'], // Filenames must match `acc_X.png`
+    bg: ['grass', 'space', 'cloud', 'desert', 'forest']
 };
 
-const PALETTES = [
-    { name: 'Classic', hex: '#FFFFFF' },        // Pure White
-    { name: 'Pinky', hex: '#FF9EAA' },          // Soft Pink
-    { name: 'Mint', hex: '#98FB98' },           // Mint Green
-    { name: 'Gold', hex: '#FFD700' },           // Gold
-    { name: 'Void', hex: '#9370DB' },           // Purple
-    { name: 'Sky', hex: '#87CEEB' },            // Blue
-    { name: 'Lava', hex: '#FF7F50' },           // Coral/Orange
-    { name: 'Toxic', hex: '#7CFC00' }           // Lime
-];
+const AUDIO = {
+    tracks: [
+        { name: 'White Noise', src: 'assets/audio/track_white_noise.mp3' },
+        { name: 'Lofi Beats', src: 'assets/audio/track_lofi_beats.mp3' },
+        { name: 'Rain Sounds', src: 'assets/audio/track_rain.mp3' }
+    ]
+};
 
-/* --- STATE --- */
 const STATE = {
     timer: {
         active: false,
@@ -31,7 +27,15 @@ const STATE = {
     },
     dex: [], // Array of collected pets
     view: 'home', // 'home', 'dex'
-    dna: null // Current incubating DNA (predetermined? No, generated on hatch)
+    dna: null, // Current incubating DNA
+
+    // Audio State
+    audio: {
+        currentTrackIdx: 0,
+        isPlaying: false,
+        isMuted: false,
+        element: new Audio()
+    }
 };
 
 /* --- DOM --- */
@@ -48,6 +52,18 @@ const DOM = {
     timeVal: document.getElementById('time-val'),
     btnStart: document.getElementById('btn-start'),
     btnDex: document.getElementById('btn-dex'),
+
+    // Music Controls
+    musicIndicator: document.getElementById('music-indicator'),
+    trackName: document.getElementById('track-name'),
+    btnPrev: document.getElementById('btn-music-prev'),
+    btnPlay: document.getElementById('btn-music-play'),
+    btnNext: document.getElementById('btn-music-next'),
+    btnMute: document.getElementById('btn-music-mute'),
+    iconPlay: document.getElementById('icon-play'),
+    iconPause: document.getElementById('icon-pause'),
+    iconSound: document.getElementById('icon-sound'),
+    iconMute: document.getElementById('icon-mute'),
 
     // UI Panels
     dexView: document.getElementById('view-dex'),
@@ -110,6 +126,15 @@ function setupControls() {
     });
 
     DOM.closeDex.addEventListener('click', toggleDex);
+
+    // --- MUSIC EVENTS ---
+    initAudio();
+
+    DOM.btnPlay.addEventListener('click', toggleMusic);
+    DOM.btnPrev.addEventListener('click', () => changeTrack(-1));
+    DOM.btnNext.addEventListener('click', () => changeTrack(1));
+    DOM.btnMute.addEventListener('click', toggleMute);
+    STATE.audio.element.addEventListener('ended', () => changeTrack(1)); // Auto next
 }
 
 function updateTimerDisplay(ms) {
@@ -362,5 +387,73 @@ function loadState() {
             const parsed = JSON.parse(saved);
             if (parsed.dex) STATE.dex = parsed.dex;
         } catch (e) { console.log(e); }
+    }
+}
+/* --- AUDIO LOGIC --- */
+function initAudio() {
+    // Set initial track
+    const track = AUDIO.tracks[STATE.audio.currentTrackIdx];
+    STATE.audio.element.src = track.src;
+    STATE.audio.element.loop = true; // Optional: loop single track or auto-next using 'ended' event
+    updateAudioUI();
+}
+
+function toggleMusic() {
+    if (STATE.audio.isPlaying) {
+        STATE.audio.element.pause();
+        STATE.audio.isPlaying = false;
+    } else {
+        STATE.audio.element.play().catch(e => console.log("Audio play failed (user interaction needed):", e));
+        STATE.audio.isPlaying = true;
+    }
+    updateAudioUI();
+}
+
+function changeTrack(direction) {
+    STATE.audio.currentTrackIdx += direction;
+    // Wrap around
+    if (STATE.audio.currentTrackIdx < 0) STATE.audio.currentTrackIdx = AUDIO.tracks.length - 1;
+    if (STATE.audio.currentTrackIdx >= AUDIO.tracks.length) STATE.audio.currentTrackIdx = 0;
+
+    const track = AUDIO.tracks[STATE.audio.currentTrackIdx];
+    STATE.audio.element.src = track.src;
+    STATE.audio.element.loop = true; // Ensure loop persists
+
+    if (STATE.audio.isPlaying) {
+        STATE.audio.element.play();
+    }
+    updateAudioUI();
+}
+
+function toggleMute() {
+    STATE.audio.isMuted = !STATE.audio.isMuted;
+    STATE.audio.element.muted = STATE.audio.isMuted;
+    updateAudioUI();
+}
+
+function updateAudioUI() {
+    const track = AUDIO.tracks[STATE.audio.currentTrackIdx];
+    DOM.trackName.innerText = track.name.toUpperCase();
+
+    // Play/Pause Icon
+    if (STATE.audio.isPlaying) {
+        DOM.iconPlay.classList.add('hidden');
+        DOM.iconPause.classList.remove('hidden');
+        DOM.musicIndicator.classList.add('bg-brand-accent', 'animate-pulse');
+        DOM.musicIndicator.classList.remove('bg-brand-text/20');
+    } else {
+        DOM.iconPlay.classList.remove('hidden');
+        DOM.iconPause.classList.add('hidden');
+        DOM.musicIndicator.classList.remove('bg-brand-accent', 'animate-pulse');
+        DOM.musicIndicator.classList.add('bg-brand-text/20');
+    }
+
+    // Mute Icon
+    if (STATE.audio.isMuted) {
+        DOM.iconSound.classList.add('hidden');
+        DOM.iconMute.classList.remove('hidden');
+    } else {
+        DOM.iconSound.classList.remove('hidden');
+        DOM.iconMute.classList.add('hidden');
     }
 }
